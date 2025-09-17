@@ -37,6 +37,7 @@ Registers a new user in the system. Requires first name, last name, email, and p
 
 ---
 
+
 ### 2. Login User
 
 **URL:** `/users/login`
@@ -65,6 +66,96 @@ Authenticates an existing user. Requires email and password. Returns an authenti
   - Body: `{ "errors": [ ... ] }`
 - `401 Unauthorized`: Invalid email or password
   - Body: `{ "message": "Invalid Email or Password" }`
+
+---
+
+
+### 3. Get User Profile
+
+**URL:** `/users/profile`
+
+**Method:** `GET`
+
+**Description:**
+Returns the authenticated user's profile information. Requires a valid JWT token in the `Authorization` header or as a cookie.
+
+**Example Request:**
+```http
+GET /users/profile HTTP/1.1
+Host: yourdomain.com
+Authorization: Bearer <jwt>
+```
+
+**Example Response:**
+```json
+{
+  "user": {
+    "_id": "1234567890",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com"
+    // ...other fields
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "message": "Unauthorized User"
+}
+```
+or
+```json
+{
+  "message": "Token is Blacklisted"
+}
+```
+
+---
+
+---
+
+
+### 4. Logout User
+
+**URL:** `/users/logout`
+
+**Method:** `GET`
+
+**Description:**
+Logs out the authenticated user by blacklisting the JWT token and clearing the cookie. Requires a valid JWT token in the `Authorization` header or as a cookie.
+
+**Example Request:**
+```http
+GET /users/logout HTTP/1.1
+Host: yourdomain.com
+Authorization: Bearer <jwt>
+```
+
+**Example Response:**
+```json
+{
+  "message": "Logged out"
+}
+```
+
+**Error Response:**
+```json
+{
+  "message": "Unauthorized User"
+}
+```
+or
+```json
+{
+  "message": "Token is Blacklisted"
+}
+```
+
+---
 
 ---
 
