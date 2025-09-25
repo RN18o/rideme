@@ -116,7 +116,6 @@ or
 
 ---
 
----
 
 
 ### 4. Logout User
@@ -329,4 +328,133 @@ or
   "message": "Token is Blacklisted"
 }
 ```
+
+
+## Map Endpoints
+
+These endpoints use Google Maps APIs to resolve addresses, compute distance/time between two points, and return place autocomplete suggestions. All map routes are protected — they require a valid JWT token either in the `Authorization: Bearer <jwt>` header or as a cookie named `token`.
+
+### 1. Get Coordinates
+
+**URL:** `/maps/get-coordinates`
+
+**Method:** `GET`
+
+**Query Parameters:**
+- `address` (string, required) — address or place name (minimum length 3)
+
+**Description:**
+Returns latitude and longitude for the given address using the Google Geocoding API.
+
+**Example Request:**
+```http
+GET /maps/get-coordinates?address=1600+Amphitheatre+Parkway HTTP/1.1
+Host: yourdomain.com
+Authorization: Bearer <jwt>
+```
+
+**Example Successful Response (200):**
+```json
+{
+  "coordinates": {
+    "lat": 37.4224764,
+    "lng": -122.0842499
+  }
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` — validation error, e.g. missing/short `address`
+  - Body: `{ "errors": [ ... ] }`
+- `404 Not Found` — address could not be resolved
+  - Body: `{ "error": "...", "message": "Coordinate not Found" }`
+- `401 Unauthorized` — missing/invalid/blacklisted token
+  - Body: `{ "message": "Unauthorized User" }` or `{ "message": "Token is Blacklisted" }`
+
+---
+
+### 2. Get Distance & Time
+
+**URL:** `/maps/get-distance-time`
+
+**Method:** `GET`
+
+**Query Parameters:**
+- `origin` (string, required) — origin address/place (min length 3)
+- `destination` (string, required) — destination address/place (min length 3)
+
+**Description:**
+Uses the Google Distance Matrix API to compute the travel distance and duration between `origin` and `destination`.
+
+**Example Request:**
+```http
+GET /maps/get-distance-time?origin=Times+Square&destination=Central+Park HTTP/1.1
+Host: yourdomain.com
+Authorization: Bearer <jwt>
+```
+
+**Example Successful Response (200):**
+```json
+{
+  "distance": {
+    "text": "4.5 km",
+    "value": 4500
+  },
+  "duration": {
+    "text": "12 mins",
+    "value": 720
+  },
+  "status": "OK"
+}
+```
+
+Note: the service returns the first element from the Distance Matrix result (the most relevant route between the provided origin and destination).
+
+**Error Responses:**
+- `400 Bad Request` — validation error or missing parameters
+  - Body: `{ "errors": [ ... ] }` or `{ "message": "Origin and destination are required" }`
+- `500 Internal Server Error` — API/network error
+  - Body: `{ "message": "Internal server error" }`
+- `401 Unauthorized` — missing/invalid/blacklisted token
+
+---
+
+### 3. Get Autocomplete Suggestions
+
+**URL:** `/maps/get-suggestions`
+
+**Method:** `GET`
+
+**Query Parameters:**
+- `input` (string, required) — partial place or address input (min length 3)
+
+**Description:**
+Returns an array of place prediction strings using the Google Places Autocomplete API.
+
+**Example Request:**
+```http
+GET /maps/get-suggestions?input=1600+Amph HTTP/1.1
+Host: yourdomain.com
+Authorization: Bearer <jwt>
+```
+
+**Example Successful Response (200):**
+```json
+[
+  "1600 Amphitheatre Parkway, Mountain View, CA, USA",
+  "1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA"
+]
+```
+
+**Error Responses:**
+- `400 Bad Request` — validation error or missing `input`
+  - Body: `{ "errors": [ ... ] }` or `{ "message": "query is required" }`
+- `500 Internal Server Error` — API/network error
+  - Body: `{ "message": "Internal server error" }`
+- `401 Unauthorized` — missing/invalid/blacklisted token
+
+
+---
+
+---
 
