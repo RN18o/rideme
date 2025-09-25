@@ -158,11 +158,7 @@ or
 
 ---
 
-## Notes
-- All responses are in JSON format.
-- The authentication token is a JWT valid for 24 hours.
-- Passwords must be at least 6 characters long.
-- First name must be at least 3 characters long.
+
 
 ## Captain Endpoints
 
@@ -457,4 +453,110 @@ Authorization: Bearer <jwt>
 ---
 
 ---
+
+## Ride Endpoints
+
+These endpoints let authenticated users create rides and estimate fares. Both routes require a valid JWT token in the `Authorization: Bearer <jwt>` header or a cookie named `token`.
+
+### 1. Create Ride
+
+**URL:** `/rides/createride`
+
+**Method:** `POST`
+
+**Description:**
+Creates a new ride request for an authenticated user. Requires pickup and destination addresses plus a vehicle type.
+
+**Request Body:**
+```json
+{
+  "pickup": "1600 Amphitheatre Parkway, Mountain View, CA",
+  "destination": "1 Infinite Loop, Cupertino, CA",
+  "vehicleType": "car" // one of ["auto", "car", "moto"]
+}
+```
+
+**Validation:**
+- `pickup`: required, string, min length 3
+- `destination`: required, string, min length 3
+- `vehicleType`: required, one of `auto`, `car`, `moto`
+
+**Example Request:**
+```http
+POST /rides/createride HTTP/1.1
+Host: yourdomain.com
+Authorization: Bearer <jwt>
+Content-Type: application/json
+
+{
+  "pickup": "1600 Amphitheatre Parkway, Mountain View, CA",
+  "destination": "1 Infinite Loop, Cupertino, CA",
+  "vehicleType": "car"
+}
+```
+
+**Example Successful Response (201):**
+```json
+{
+  "_id": "607d1b2f5f3b2c0015b7c0a1",
+  "user": "60fc7f9b9b1e8a00123abcd4",
+  "pickup": "1600 Amphitheatre Parkway, Mountain View, CA",
+  "destination": "1 Infinite Loop, Cupertino, CA",
+  "fare": 120,
+  "status": "pending",
+  "otp": "<hidden>",
+  "createdAt": "2025-09-25T12:34:56.789Z",
+  "updatedAt": "2025-09-25T12:34:56.789Z"
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` — validation errors
+  - Body: `{ "errors": [ ... ] }`
+- `500 Internal Server Error` — server error when creating ride
+  - Body: `{ "message": "..." }`
+
+---
+
+### 2. Get Fare
+
+**URL:** `/rides/get-fare`
+
+**Method:** `GET`
+
+**Description:**
+Returns estimated fares for supported vehicle types between two addresses. Uses the distance and duration computed from the Maps service.
+
+**Query Parameters:**
+- `pickup` (string, required)
+- `destination` (string, required)
+
+**Example Request:**
+```http
+GET /rides/get-fare?pickup=1600+Amphitheatre+Parkway&destination=1+Infinite+Loop HTTP/1.1
+Host: yourdomain.com
+Authorization: Bearer <jwt>
+```
+
+**Example Successful Response (200):**
+```json
+{
+  "auto": 85,
+  "car": 120,
+  "moto": 60
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` — validation errors or missing params
+  - Body: `{ "errors": [ ... ] }`
+- `500 Internal Server Error` — API or computation error
+  - Body: `{ "message": "..." }`
+
+
+## Notes
+- All responses are in JSON format.
+- The authentication token is a JWT valid for 24 hours.
+- Passwords must be at least 6 characters long.
+- First name must be at least 3 characters long.
 

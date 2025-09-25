@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-module.exports.getAddressCoordinates = async({address}) => {
+module.exports.getAddressCoordinates = async(address) => {
     const apikey = process.env.GOOGLE_MAPS_API_KEY;
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apikey}`;
 
@@ -30,18 +30,18 @@ module.exports.getDistanceTime = async (origin, destination) => {
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
     const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
-
+    // console.log("URL:",url)
     try {
-
-
         const response = await axios.get(url);
+        console.log(response.data.rows[0].elements[0]);
         if (response.data.status === 'OK') {
 
-            if (response.data.rows[ 0 ].elements[ 0 ].status === 'ZERO_RESULTS') {
+            if (response.data.rows[0].elements[0].status === 'ZERO_RESULTS') {
                 throw new Error('No routes found');
             }
-
-            return response.data.rows[0].elements[0];
+            else {
+                  return response.data.rows[0].elements[0];
+            }
         } else {
             throw new Error('Unable to fetch distance and time');
         }

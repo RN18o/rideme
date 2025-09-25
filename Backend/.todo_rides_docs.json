@@ -1,0 +1,6 @@
+{
+  "tasks": [
+    { "id": 1, "title": "Add Rides docs", "status": "in-progress", "description": "Add documentation for /rides/createride and /rides/get-fare with example requests and responses to Backend/README.md" },
+    { "id": 2, "title": "Verify README updated", "status": "not-started", "description": "Confirm file saved and content present" }
+  ]
+}
